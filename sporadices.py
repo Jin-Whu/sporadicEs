@@ -80,11 +80,19 @@ def sporadices(filepath, outdir):
     leo_pos = zip(leo_x, leo_y, leo_z)
     gps_pos = zip(gps_x, gps_y, gps_z)
     height = list()
+    lat = list()
+    lon = list()
     for leop, gpsp, t in zip(leo_pos, gps_pos, time):
         tanpoint, isocc = caltanpoint(leop, gpsp)
         t = starttime + t
         geopos = geotrans.eci2geo(tanpoint, t, True)
         height.append(geopos[2] / 1E3)
+        lat.append(geopos[0])
+        lon.append(geopos[1])
+
+    height = np.array(height)
+    lat = np.array(lat)
+    lon = np.array(lon)
 
     exl1pert = (exl1 - smooth(exl1, 51)) * 1e5
     exl1pert = exl1pert - smooth(exl1pert, 51)
@@ -139,13 +147,16 @@ def sporadices(filepath, outdir):
     plt.xlim([-10, 10])
     plt.xlabel('L2 phase Pert/cm')
 
-    plt.suptitle('%s' % data.fileStamp, size=20)
+    es_index = np.argmax(abs(snrpert) > 0.5)  # sporadicEs
+    es_lon = lon[es_index]
+    es_lat = lat[es_index]
+    plt.suptitle('%s (%.2f %.2f)' % (data.fileStamp, es_lon, es_lat), size=20)
     # plt.show()
 
-    res = os.path.join(outdir, 'sporadicEsRes')
+    res = os.path.join(outdir, 'sporadicEs')
     if not os.path.exists(res):
         os.makedirs(res)
-    if np.argmax(abs(snrpert) > 0.5) > 0:
+    if es_index > 0:
         figpath = os.path.join(res, '%s.png' % data.fileStamp)
         plt.savefig(figpath, bbox_inches='tight')
     plt.clf()

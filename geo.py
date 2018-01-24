@@ -103,8 +103,8 @@ class Geo(object):
             z = ecef[2] + v * e2 * sinp
         pos = np.array([0., 0., 0.])
         if r2 > 1E-12:
-            pos[0] = np.rad2deg(np.arctan(z / np.sqrt(r2)))
-            pos[1] = np.rad2deg(np.arctan2(ecef[1], ecef[2]))
+            pos[0] = np.arctan(z / np.sqrt(r2))
+            pos[1] = np.arctan2(ecef[1], ecef[2])
         else:
             pos[0] = 90 if ecef[2] > 0 else -90
             pos[1] = 0
