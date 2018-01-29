@@ -66,11 +66,12 @@ def sporadices(filepath, outdir):
         data = Dataset(filepath)
     except IOError:
         return
+    data.set_auto_mask(False)
+    starttime = data.startTime
+    time = data.variables['time'][:]
     exl1 = data.variables['exL1'][:] * 1e-3
     exl2 = data.variables['exL2'][:] * 1e-3
     snr = data.variables['caL1Snr'][:] * 0.1
-    starttime = data.startTime
-    time = data.variables['time'][:]
     leo_x = data.variables['xLeo'][:] * 1E3
     leo_y = data.variables['yLeo'][:] * 1E3
     leo_z = data.variables['zLeo'][:] * 1E3
