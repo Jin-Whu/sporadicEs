@@ -106,6 +106,8 @@ def sporadices(filepath, outdir):
     es_index = np.argmax(abs(snrpert) > 0.5)  # sporadicEs
     if es_index == 0:
         return
+    if height[es_index] < 90 or height[es_index] > 120:
+        return
     es_lon = lon[es_index]
     es_lat = lat[es_index]
 
@@ -155,7 +157,7 @@ def sporadices(filepath, outdir):
     plt.xlim([-10, 10])
     plt.xlabel('L2 phase Pert/cm')
 
-    plt.suptitle('%s (%.2f %.2f)' % (data.fileStamp, es_lon, es_lat), size=20)
+    plt.suptitle('%s (%.2f %.2f)' % (data.fileStamp, es_lat, es_lon), size=20)
     # plt.show()
 
     res = os.path.join(outdir, 'sporadicEs')
