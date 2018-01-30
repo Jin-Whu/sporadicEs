@@ -102,6 +102,13 @@ def sporadices(filepath, outdir):
     snr0 = smooth(snr, 101)
     snrpert = (snr - snr0) / snr0
 
+    # sporadicEs location
+    es_index = np.argmax(abs(snrpert) > 0.5)  # sporadicEs
+    if es_index == 0:
+        return
+    es_lon = lon[es_index]
+    es_lat = lat[es_index]
+
     # plot
     plt.figure(figsize=(12, 10))
     xloglocator = ticker.LogLocator()
@@ -148,18 +155,14 @@ def sporadices(filepath, outdir):
     plt.xlim([-10, 10])
     plt.xlabel('L2 phase Pert/cm')
 
-    es_index = np.argmax(abs(snrpert) > 0.5)  # sporadicEs
-    es_lon = lon[es_index]
-    es_lat = lat[es_index]
     plt.suptitle('%s (%.2f %.2f)' % (data.fileStamp, es_lon, es_lat), size=20)
     # plt.show()
 
     res = os.path.join(outdir, 'sporadicEs')
     if not os.path.exists(res):
         os.makedirs(res)
-    if es_index > 0:
-        figpath = os.path.join(res, '%s.png' % data.fileStamp)
-        plt.savefig(figpath, bbox_inches='tight')
+    figpath = os.path.join(res, '%s.png' % data.fileStamp)
+    plt.savefig(figpath, bbox_inches='tight')
     plt.clf()
     plt.close()
 
