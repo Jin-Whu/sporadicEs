@@ -4,10 +4,13 @@
 import argparse
 import os
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
 from netCDF4 import Dataset
 import geo
+if os.name != 'nt':
+    import matplotlib
+    matplotlib.use('agg')
+import matplotlib.pyplot as plt # noqa
+import matplotlib.ticker as ticker # noqa
 
 
 def smooth(array, WSZ=5):
@@ -112,6 +115,7 @@ def sporadices(filepath, outdir):
     es_lat = lat[es_index]
 
     # plot
+    plt.style.use('classic')
     plt.figure(figsize=(12, 10))
     xloglocator = ticker.LogLocator()
 
@@ -160,10 +164,7 @@ def sporadices(filepath, outdir):
     plt.suptitle('%s (%.2f %.2f)' % (data.fileStamp, es_lat, es_lon), size=20)
     # plt.show()
 
-    res = os.path.join(outdir, 'sporadicEs')
-    if not os.path.exists(res):
-        os.makedirs(res)
-    figpath = os.path.join(res, '%s.png' % data.fileStamp)
+    figpath = os.path.join(outdir, '%s.png' % data.fileStamp)
     plt.savefig(figpath, bbox_inches='tight')
     plt.clf()
     plt.close()
@@ -200,7 +201,7 @@ def process(ins, out, flag):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        prog='sporadicEs', description='save snr perturbations', version='1.0')
+        prog='sporadicEs', description='save snr perturbations')
     parser.add_argument(
         'input',
         type=str,
