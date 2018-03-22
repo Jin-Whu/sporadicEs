@@ -9,8 +9,12 @@ import geo
 if os.name != 'nt':
     import matplotlib
     matplotlib.use('agg')
-import matplotlib.pyplot as plt # noqa
-import matplotlib.ticker as ticker # noqa
+import matplotlib.pyplot as plt  # noqa
+import matplotlib.ticker as ticker  # noqa
+
+
+KF1 = 1575.42
+KF2 = 1227.60
 
 
 def smooth(array, WSZ=5):
@@ -123,6 +127,7 @@ def sporadices(filepath, outdir):
     plt.plot(snr, height)
     plt.ylim([0, 140])
     plt.xlabel('SNR')
+    plt.ylabel('Height/km')
     plt.xticks(np.arange(0, 1800, 300))
 
     ax = plt.subplot(2, 3, 2)
@@ -133,38 +138,76 @@ def sporadices(filepath, outdir):
     ax.xaxis.set_major_locator(xloglocator)
     plt.xticks([1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1])
     plt.xlabel('L1 Excess Phase/km')
+    plt.ylabel('Height/km')
 
     ax = plt.subplot(2, 3, 3)
     plt.plot(exl2, height)
+    plt.plot()
     plt.ylim([0, 140])
     plt.xlim([1e-5, 1])
     ax.set_xscale('log')
     ax.xaxis.set_major_locator(xloglocator)
     plt.xticks([1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1])
     plt.xlabel('L2 Excess Phase/km')
+    plt.ylabel('Height/km')
 
     plt.subplot(2, 3, 4)
     plt.plot(snrpert, height)
     plt.ylim([0, 140])
     plt.xlim([-1, 1])
     plt.xlabel('SNR/SNR0 Pert')
+    plt.ylabel('Height/km')
 
     plt.subplot(2, 3, 5)
     plt.plot(exl1pert, height)
     plt.ylim([0, 140])
     plt.xlim([-10, 10])
     plt.xlabel('L1 phase Pert/cm')
+    plt.ylabel('Height(km)')
 
     plt.subplot(2, 3, 6)
     plt.plot(exl2pert, height)
     plt.ylim([0, 140])
     plt.xlim([-10, 10])
     plt.xlabel('L2 phase Pert/cm')
+    plt.ylabel('Height/km')
 
-    plt.suptitle('%s (%.2f %.2f)' % (data.fileStamp, es_lat, es_lon), size=20)
+    plt.tight_layout()
     # plt.show()
 
     figpath = os.path.join(outdir, '%s.png' % data.fileStamp)
+    plt.savefig(figpath, bbox_inches='tight')
+    plt.clf()
+    plt.close()
+
+    # correlation
+    heights = [(75, 103), (103, 107), (107, 120)]
+    plt.figure(figsize=(12, 10))
+
+    slope = KF1 * KF1 / (KF2 * KF2)
+    x = np.linspace(-10, 10, 100)
+    y = x * slope
+    for i in range(3):
+        ind = np.logical_and(height > heights[i][0], height < heights[i][1])
+        plt.subplot(3, 2, 2 * i + 1)
+        plt.scatter(exl1pert[ind], snrpert[ind])
+        plt.ylim([-1, 1])
+        plt.xlim([-10, 10])
+        plt.xlabel('L1  Ph Pert/cm')
+        plt.ylabel('SNR/SNR0 Pert')
+        plt.title('%d-%dkm' % (heights[i][0], heights[i][1]))
+
+        plt.subplot(3, 2, 2 * i + 2)
+        plt.scatter(exl1pert[ind], exl2pert[ind])
+        plt.plot(x, y)
+        plt.ylim([-10, 10])
+        plt.xlim([-10, 10])
+        plt.xlabel('L1 Ph Pert/cm')
+        plt.ylabel('L2 Ph Pert/cm')
+        plt.title('%d-%dkm' % (heights[i][0], heights[i][1]))
+
+    plt.tight_layout()
+    figpath = os.path.join(outdir, '%s-CORR.png' % data.fileStamp)
     plt.savefig(figpath, bbox_inches='tight')
     plt.clf()
     plt.close()
